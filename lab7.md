@@ -265,6 +265,15 @@ Utiliza los scripts de captura en `SOC-Sniffer` y los scripts generadores en `Io
 
 ### 7. Extracción de 115 Características N-BaIoT y Detección con IA (Colab o Local)
 
+#### Paso Previo en `SOC-Sniffer`: Regresar al Modo Conectado a `Net` (Internet)
+Una vez finalizadas las 3 capturas (`benign.pcap`, `mirai_scan.pcap`, `mirai_syn.pcap`), para que `SOC-Sniffer` recupere salida a Internet dentro del emulador PNETLab y puedas abrir **Google Colab** (o actualizar el repositorio):
+1. En la topología de PNETLab, desconecta la interfaz `eth0` de `SOC-Sniffer` del puerto `Gi0/2` de `SW-Core` y **conéctala nuevamente a la nube `Net`**.
+2. Ejecuta en `SOC-Sniffer` el script de retorno a red con Internet (desactiva `promisc`, obtiene IP por DHCP, configura DNS, sincroniza `git pull` y habilita permisos en `./pcaps`):
+   ```bash
+   cd /opt/mirai
+   sudo bash scripts/soc-sniffer/04_regresar_modo_net.sh
+   ```
+
 Tienes dos modalidades para ejecutar el pipeline de Inteligencia Artificial ubicado en `ai-pipeline/`:
 
 #### Modalidad A: Ejecución directa en `SOC-Sniffer` (100% Offline en el laboratorio)

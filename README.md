@@ -65,7 +65,8 @@ mirai/
 │   └── soc-sniffer/                               # 3. Nodo SOC-Sniffer (eth0 Promiscuo sin IP)
 │       ├── 01_fase_net_install.sh                 # [Con Net] Hostname SOC-Sniffer + DHCP + tcpdump, tshark, Kitsune-py
 │       ├── 02_fase_aislada_promisc.sh             # [Aislado] Hostname SOC-Sniffer + Limpia IP + activa PROMISC
-│       └── 03_capturar_escenario.sh               # [Captura] Graba benign.pcap, mirai_scan.pcap o mirai_syn.pcap
+│       ├── 03_capturar_escenario.sh               # [Captura] Graba benign.pcap, mirai_scan.pcap o mirai_syn.pcap
+│       └── 04_regresar_modo_net.sh                # [Con Net] Quita PROMISC, pide DHCP a Net y sincroniza para usar Colab
 ├── configs/
 │   ├── router-hogar/                              # 4. Nodo Router-Hogar (MikroTik CHR 6.49.10)
 │   │   ├── 01_config_inicial_nat.rsc              # LAN 192.168.10.1/24, WAN 172.16.0.2/24 y NAT Masquerade
@@ -153,6 +154,12 @@ sudo bash scripts/soc-sniffer/02_fase_aislada_promisc.sh
 sudo bash scripts/soc-sniffer/03_capturar_escenario.sh benign
 sudo bash scripts/soc-sniffer/03_capturar_escenario.sh mirai_scan
 sudo bash scripts/soc-sniffer/03_capturar_escenario.sh mirai_syn
+```
+**C) Reconectar `eth0` a la nube `Net` para tener Internet y subir a Google Colab:**
+*(En PNETLab, desconecta `eth0` de `SW-Core Gi0/2`, conéctalo a la nube `Net` y ejecuta):*
+```bash
+cd /opt/mirai
+sudo bash scripts/soc-sniffer/04_regresar_modo_net.sh
 ```
 
 ---
