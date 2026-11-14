@@ -163,6 +163,19 @@ write memory
 show monitor session 1
 ```
 
+**Resultado esperado de `show monitor session 1`:**
+```text
+SW-Core# show monitor session 1
+Session 1
+---------
+Type                   : Local Session
+Source Ports           : 
+    Both               : Gi0/0
+Destination Ports      : Gi0/2
+    Encapsulation      : Native
+          Ingress      : Disabled
+```
+
 #### Paso 5.3: Ejecutar los scripts de Red Aislada en cada nodo Linux (Hostname + IP)
 
 **En `Victima-Web` (Hostname `Victima-Web` | `172.16.0.100/24`):**

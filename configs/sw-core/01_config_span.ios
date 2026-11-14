@@ -27,3 +27,17 @@ configure terminal
 end
 write memory
 show monitor session 1
+
+! ==============================================================================
+! RESULTADO ESPERADO DE 'show monitor session 1':
+!
+! SW-Core# show monitor session 1
+! Session 1
+! ---------
+! Type                   : Local Session
+! Source Ports           : 
+!     Both               : Gi0/0
+! Destination Ports      : Gi0/2
+!     Encapsulation      : Native
+!           Ingress      : Disabled
+! ==============================================================================
