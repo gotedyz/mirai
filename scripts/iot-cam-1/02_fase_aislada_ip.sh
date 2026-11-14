@@ -18,8 +18,9 @@ echo "[IoT-Cam-1] Configuración de Red Aislada ($STATIC_IP | GW: $GATEWAY)"
 echo "=================================================================="
 
 echo "[1/5] Verificando/asignando hostname '$NODE_HOSTNAME'..."
-hostnamectl set-hostname "$NODE_HOSTNAME" 2>/dev/null || hostname "$NODE_HOSTNAME"
 echo "$NODE_HOSTNAME" > /etc/hostname
+hostname "$NODE_HOSTNAME" 2>/dev/null || true
+hostnamectl set-hostname "$NODE_HOSTNAME" 2>/dev/null || true
 if grep -q "^127\.0\.1\.1" /etc/hosts; then
     sed -i "s/^127\.0\.1\.1.*/127.0.1.1\t$NODE_HOSTNAME/" /etc/hosts
 else
@@ -36,7 +37,7 @@ ip link set "$IFACE" up
 
 echo "[4/5] Configurando puerta de enlace predeterminada ($GATEWAY)..."
 ip route replace default via "$GATEWAY"
-echo "Hostname actual: $(hostname)"
+echo "Hostname activo: $(hostname)"
 ip -4 addr show "$IFACE"
 ip route show
 

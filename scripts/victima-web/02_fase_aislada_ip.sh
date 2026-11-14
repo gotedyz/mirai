@@ -16,8 +16,9 @@ echo "[Victima-Web] Configuración en Red Aislada ($STATIC_IP)"
 echo "=================================================================="
 
 echo "[1/4] Verificando/asignando hostname '$NODE_HOSTNAME'..."
-hostnamectl set-hostname "$NODE_HOSTNAME" 2>/dev/null || hostname "$NODE_HOSTNAME"
 echo "$NODE_HOSTNAME" > /etc/hostname
+hostname "$NODE_HOSTNAME" 2>/dev/null || true
+hostnamectl set-hostname "$NODE_HOSTNAME" 2>/dev/null || true
 if grep -q "^127\.0\.1\.1" /etc/hosts; then
     sed -i "s/^127\.0\.1\.1.*/127.0.1.1\t$NODE_HOSTNAME/" /etc/hosts
 else
@@ -33,8 +34,8 @@ ip addr add "$STATIC_IP" dev "$IFACE"
 ip link set "$IFACE" up
 
 echo "[4/4] Verificando estado del servicio Nginx..."
-systemctl start nginx
-echo "Hostname actual: $(hostname)"
+systemctl start nginx 2>/dev/null || service nginx start 2>/dev/null || /usr/sbin/nginx 2>/dev/null || true
+echo "Hostname activo: $(hostname)"
 ip -4 addr show "$IFACE"
 curl -I http://172.16.0.100
 

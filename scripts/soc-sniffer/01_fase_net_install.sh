@@ -15,8 +15,9 @@ echo "[SOC-Sniffer] Fase Previa (Net): Hostname + Sniffer y Motor IA"
 echo "=================================================================="
 
 echo "[1/4] Configurando hostname del sistema como '$NODE_HOSTNAME'..."
-hostnamectl set-hostname "$NODE_HOSTNAME" 2>/dev/null || hostname "$NODE_HOSTNAME"
 echo "$NODE_HOSTNAME" > /etc/hostname
+hostname "$NODE_HOSTNAME" 2>/dev/null || true
+hostnamectl set-hostname "$NODE_HOSTNAME" 2>/dev/null || true
 if grep -q "^127\.0\.1\.1" /etc/hosts; then
     sed -i "s/^127\.0\.1\.1.*/127.0.1.1\t$NODE_HOSTNAME/" /etc/hosts
 else
@@ -24,14 +25,14 @@ else
 fi
 
 echo "[2/4] Solicitando IP por DHCP en $IFACE..."
-dhclient "$IFACE" || true
+dhclient "$IFACE" 2>/dev/null || true
 ip -4 addr show "$IFACE"
 
-echo "[3/4] Instalando tcpdump, tshark y herramientas Python para IA..."
+echo "[3/4] Instalando tcpdump, tshark y librerías IA (sin actualizar systemd/python3 base)..."
 export DEBIAN_FRONTEND=noninteractive
 echo "wireshark-common wireshark-common/install-setuid boolean true" | debconf-set-selections || true
 apt-get update -y
-apt-get install -y tcpdump tshark git python3 python3-pip python3-scapy python3-numpy python3-pandas python3-scipy python3-sklearn
+apt-get install -y --no-upgrade tcpdump tshark git python3-scapy python3-numpy python3-pandas python3-scipy python3-sklearn
 
 echo "[4/4] Clonando repositorio oficial Kitsune-py (AfterImage) para uso offline..."
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -39,9 +40,11 @@ PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 if [ ! -d "$PROJECT_ROOT/ai-pipeline/Kitsune-py" ]; then
     git clone https://github.com/ymirsky/Kitsune-py.git "$PROJECT_ROOT/ai-pipeline/Kitsune-py"
 fi
+chmod -R a+rX "$PROJECT_ROOT" 2>/dev/null || true
 
 echo "=================================================================="
 echo "[OK] Nodo '$NODE_HOSTNAME' listo con tcpdump, tshark y Kitsune-py preinstalados."
-echo " -> SIGUIENTE PASO: Ejecuta 'poweroff', elimina el cable hacia 'Net'"
+echo "     (El nuevo hostname '$NODE_HOSTNAME' se verá en el prompt tras reiniciar)."
+echo " -> SIGUIENTE PASO: Ejecuta 'sudo poweroff', elimina el cable hacia 'Net'"
 echo "    y conecta '$IFACE' al puerto espejo Gi0/2 de SW-Core."
 echo "=================================================================="
