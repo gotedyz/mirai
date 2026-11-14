@@ -1,0 +1,34 @@
+# ==============================================================================
+# SEGURIDAD: Ignorar estrictamente credenciales, API keys, tokens y certificados
+# ==============================================================================
+.env
+.env.*
+*.env
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+id_rsa*
+id_ed25519*
+*secret*
+*credential*
+*token*
+tokens/
+secrets/
+.ssh/
+
+# ==============================================================================
+# Ignorar capturas de tráfico pesadas, datasets temporales y entornos virtuales
+# ==============================================================================
+*.pcap
+*.pcapng
+*.tsv
+__pycache__/
+.venv/
+venv/
+.ipynb_checkpoints/
+Kitsune-py/
+*.zip
+*.7z
+*.qcow2

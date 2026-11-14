@@ -1,0 +1,8 @@
+# Garantizar saltos de línea LF (Unix) para todos los scripts que se clonarán en Linux/RouterOS/Cisco
+*.sh text eol=lf
+*.rsc text eol=lf
+*.ios text eol=lf
+*.py text eol=lf
+*.md text eol=lf
+*.json text eol=lf
+*.txt text eol=lf

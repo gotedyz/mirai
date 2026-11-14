@@ -1,0 +1,29 @@
+! ==============================================================================
+! NODO: SW-Core (Cisco vIOS-L2 - viosl2-adventerprisek9-m.ssa.high_iron_20200929)
+! FASE 5.2: Configuración de Puertos de Acceso y SPAN (Port Mirroring)
+! Puertos:
+!   Gi0/0 -> Conectado a Router-Hogar (ether2 - WAN 172.16.0.2) [ORIGEN SPAN]
+!   Gi0/1 -> Conectado a Victima-Web (eth0 - 172.16.0.100)
+!   Gi0/2 -> Conectado a SOC-Sniffer (eth0 - Promiscuo)         [DESTINO SPAN]
+! ==============================================================================
+enable
+configure terminal
+ hostname SW-Core
+ !
+ interface range Gi0/0 - 1
+  description Enlaces-Operadora-y-Victima
+  switchport mode access
+  no shutdown
+ exit
+ !
+ interface Gi0/2
+  description Puerto-Espejo-SOC-Sniffer
+  no shutdown
+ exit
+ !
+ no monitor session 1
+ monitor session 1 source interface Gi0/0 both
+ monitor session 1 destination interface Gi0/2
+end
+write memory
+show monitor session 1

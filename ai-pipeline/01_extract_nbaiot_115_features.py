@@ -1,0 +1,123 @@
+#!/usr/bin/env python3
+"""
+PROYECTO MIRAI - FASE 7 (Celda 1 / Script 01)
+Extracción de las 115 características estadísticas de N-BaIoT con AfterImage (Kitsune-py).
+Compatible con Google Colab y ejecución local en SOC-Sniffer.
+
+Uso:
+    python3 ai-pipeline/01_extract_nbaiot_115_features.py [--pcap-dir ./pcaps] [--out nbaiot_pnetlab.csv]
+"""
+import argparse
+import os
+import subprocess
+import sys
+from pathlib import Path
+
+import numpy as np
+import pandas as pd
+
+
+def ensure_kitsune_repo(base_dir: Path) -> Path:
+    """Busca o clona Kitsune-py para importar FeatureExtractor (AfterImage)."""
+    candidates = [
+        Path("/content/Kitsune-py"),
+        base_dir / "Kitsune-py",
+        Path.cwd() / "Kitsune-py",
+    ]
+    for candidate in candidates:
+        if (candidate / "FeatureExtractor.py").exists():
+            sys.path.insert(0, str(candidate))
+            return candidate
+
+    target = base_dir / "Kitsune-py"
+    print(f"[*] Clonando Kitsune-py en {target}...")
+    subprocess.run(
+        ["git", "clone", "-q", "https://github.com/ymirsky/Kitsune-py.git", str(target)],
+        check=True,
+    )
+    sys.path.insert(0, str(target))
+    return target
+
+
+def resolve_pcap_path(filename: str, search_dirs: list[Path]) -> Path:
+    for d in search_dirs:
+        p = d / filename
+        if p.exists():
+            return p
+    raise FileNotFoundError(
+        f"No se encontró '{filename}' en ninguna de las rutas: {[str(d) for d in search_dirs]}"
+    )
+
+
+def pcap_a_dataframe(ruta_pcap: Path, etiqueta: int, escenario: str) -> pd.DataFrame:
+    from FeatureExtractor import FE
+
+    # Eliminar archivos .tsv temporales previos si existen para forzar re-extracción limpia
+    tsv_file = Path(f"{ruta_pcap}.tsv")
+    if tsv_file.exists():
+        tsv_file.unlink()
+
+    print(f"[+] Extrayendo 115 características N-BaIoT de: {ruta_pcap.name} (label={etiqueta}, {escenario})...")
+    extractor = FE(str(ruta_pcap), limit=np.inf)
+    columnas = extractor.nstat.getNetStatHeaders()
+    filas = []
+
+    while True:
+        vector = extractor.get_next_vector()
+        if len(vector) == 0:
+            break
+        filas.append(vector)
+
+    df = pd.DataFrame(filas, columns=columnas)
+    df["label"] = etiqueta
+    df["scenario"] = escenario
+    print(f"    -> Paquetes procesados: {len(df):,} | Dimensiones: {df.shape}")
+    return df
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Extractor de 115 features N-BaIoT (AfterImage)")
+    parser.add_argument("--pcap-dir", type=str, default=".", help="Directorio donde están los .pcap")
+    parser.add_argument("--out", type=str, default="nbaiot_pnetlab.csv", help="Ruta del CSV de salida")
+    args = parser.parse_args()
+
+    script_dir = Path(__file__).resolve().parent
+    project_root = script_dir.parent
+    ensure_kitsune_repo(script_dir)
+
+    search_dirs = [
+        Path(args.pcap_dir).resolve(),
+        Path.cwd(),
+        project_root / "pcaps",
+        script_dir,
+    ]
+
+    benign_path = resolve_pcap_path("benign.pcap", search_dirs)
+    scan_path = resolve_pcap_path("mirai_scan.pcap", search_dirs)
+    syn_path = resolve_pcap_path("mirai_syn.pcap", search_dirs)
+
+    df_0 = pcap_a_dataframe(benign_path, etiqueta=0, escenario="benign")
+    df_1a = pcap_a_dataframe(scan_path, etiqueta=1, escenario="mirai_scan")
+    df_1b = pcap_a_dataframe(syn_path, etiqueta=1, escenario="mirai_syn")
+
+    df_pnetlab = (
+        pd.concat([df_0, df_1a, df_1b], ignore_index=True)
+        .sample(frac=1, random_state=42)
+        .reset_index(drop=True)
+    )
+
+    out_path = Path(args.out).resolve()
+    df_pnetlab.to_csv(out_path, index=False)
+
+    print("\n==================================================================")
+    print(f"[OK] Dataset N-BaIoT generado con éxito: {out_path}")
+    print(f"     Dimensiones totales : {df_pnetlab.shape[0]:,} filas x {df_pnetlab.shape[1]} columnas")
+    print("     Distribución por etiqueta (0=Benigno, 1=Mirai):")
+    print(df_pnetlab["label"].value_counts().to_string())
+    print("     Distribución por escenario:")
+    print(df_pnetlab["scenario"].value_counts().to_string())
+    print("==================================================================")
+
+
+if __name__ == "__main__":
+    main()
