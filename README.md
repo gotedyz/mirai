@@ -158,7 +158,21 @@ sudo bash scripts/soc-sniffer/03_capturar_escenario.sh mirai_syn
 ---
 
 ### 4. En `Router-Hogar` (MikroTik CHR `6.49.10`) y `SW-Core` (Cisco `vIOS-L2`)
-- **Router-Hogar:** Copiar y pegar el contenido de [`configs/router-hogar/01_config_inicial_nat.rsc`](configs/router-hogar/01_config_inicial_nat.rsc) y, para la mitigación final del SOC, aplicar [`configs/router-hogar/02_activar_cuarentena_suave.rsc`](configs/router-hogar/02_activar_cuarentena_suave.rsc).
+- **Router-Hogar:** Copiar y pegar el contenido de [`configs/router-hogar/01_config_inicial_nat.rsc`](configs/router-hogar/01_config_inicial_nat.rsc) y, para la mitigación final del SOC, aplicar [`configs/router-hogar/02_activar_cuarentena_suave.rsc`](configs/router-hogar/02_activar_cuarentena_suave.rsc). Al finalizar con `/ip address print` y `/ip firewall nat print`, el resultado esperado es:
+  ```text
+  [admin@Router-Hogar] > /ip address print
+  Flags: X - disabled, I - invalid, D - dynamic
+   #   ADDRESS            NETWORK         INTERFACE
+   0   ;;; LAN-Hogar
+       192.168.10.1/24    192.168.10.0    ether1
+   1   ;;; WAN-Operadora
+       172.16.0.2/24      172.16.0.0      ether2
+
+  [admin@Router-Hogar] > /ip firewall nat print
+  Flags: X - disabled, I - invalid, D - dynamic
+   0    ;;; NAT-Salida-Operadora
+        chain=srcnat action=masquerade out-interface=ether2
+  ```
 - **SW-Core:** Copiar y pegar el contenido de [`configs/sw-core/01_config_span.ios`](configs/sw-core/01_config_span.ios). Al finalizar con `show monitor session 1`, el resultado esperado es:
   ```text
   SW-Core# show monitor session 1

@@ -16,3 +16,20 @@ add chain=srcnat out-interface=ether2 action=masquerade comment="NAT-Salida-Oper
 
 /ip address print
 /ip firewall nat print
+
+# ==============================================================================
+# RESULTADO ESPERADO EN CONSOLA MIKROTIK (Router-Hogar):
+#
+# [admin@Router-Hogar] > /ip address print
+# Flags: X - disabled, I - invalid, D - dynamic
+#  #   ADDRESS            NETWORK         INTERFACE
+#  0   ;;; LAN-Hogar
+#      192.168.10.1/24    192.168.10.0    ether1
+#  1   ;;; WAN-Operadora
+#      172.16.0.2/24      172.16.0.0      ether2
+#
+# [admin@Router-Hogar] > /ip firewall nat print
+# Flags: X - disabled, I - invalid, D - dynamic
+#  0    ;;; NAT-Salida-Operadora
+#       chain=srcnat action=masquerade out-interface=ether2
+# ==============================================================================
