@@ -2,16 +2,29 @@
 """
 PROYECTO MIRAI - FASE 7 (Celda 1 / Script 01)
 Extracción de las 115 características estadísticas de N-BaIoT con AfterImage (Kitsune-py).
-Compatible con Google Colab y ejecución local en SOC-Sniffer.
+Compatible con Google Colab y ejecución local en SOC-Sniffer (Python 3.10 - 3.14+).
 
 Uso:
     python3 ai-pipeline/01_extract_nbaiot_115_features.py [--pcap-dir ./pcaps] [--out nbaiot_pnetlab.csv]
 """
 import argparse
-import os
 import subprocess
 import sys
+import types
+import warnings
 from pathlib import Path
+
+# Silenciar SyntaxWarnings de secuencias de escape antiguas en Kitsune-py bajo Python 3.12+/3.14
+warnings.filterwarnings("ignore", category=SyntaxWarning)
+
+# Shim para pyximport (Cython): Kitsune-py/netStat.py ejecuta 'import pyximport; pyximport.install()'
+# aunque AfterImage.py es 100% Python puro. Si Cython no está instalado, proveemos un módulo no-op.
+try:
+    import pyximport  # type: ignore
+except ImportError:
+    _dummy_pyximport = types.ModuleType("pyximport")
+    _dummy_pyximport.install = lambda *args, **kwargs: None  # type: ignore
+    sys.modules["pyximport"] = _dummy_pyximport
 
 import numpy as np
 import pandas as pd
@@ -55,7 +68,10 @@ def pcap_a_dataframe(ruta_pcap: Path, etiqueta: int, escenario: str) -> pd.DataF
     # Eliminar archivos .tsv temporales previos si existen para forzar re-extracción limpia
     tsv_file = Path(f"{ruta_pcap}.tsv")
     if tsv_file.exists():
-        tsv_file.unlink()
+        try:
+            tsv_file.unlink()
+        except PermissionError:
+            pass
 
     print(f"[+] Extrayendo 115 características N-BaIoT de: {ruta_pcap.name} (label={etiqueta}, {escenario})...")
     extractor = FE(str(ruta_pcap), limit=np.inf)

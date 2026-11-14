@@ -56,8 +56,9 @@ echo "------------------------------------------------------------------"
 
 tcpdump -i "$IFACE" -U -w "$OUT_FILE" || true
 
-# Crear enlace simbólico o copia en el directorio actual para acceso rápido
+# Crear enlace simbólico o copia en el directorio actual y dar permisos de escritura para tshark (.tsv)
 cp -f "$OUT_FILE" "./$PCAP_NAME" 2>/dev/null || true
+chmod -R 777 "$PCAP_DIR" "./$PCAP_NAME" 2>/dev/null || true
 
 echo ""
 echo "=================================================================="

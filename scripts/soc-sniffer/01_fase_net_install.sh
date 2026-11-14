@@ -40,7 +40,9 @@ PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 if [ ! -d "$PROJECT_ROOT/ai-pipeline/Kitsune-py" ]; then
     git clone https://github.com/ymirsky/Kitsune-py.git "$PROJECT_ROOT/ai-pipeline/Kitsune-py"
 fi
-chmod -R a+rX "$PROJECT_ROOT" 2>/dev/null || true
+# Desactivar llamada innecesaria a pyximport en Kitsune-py/netStat.py (AfterImage es Python puro)
+sed -i 's/^import pyximport/#import pyximport/g; s/^pyximport\.install()/#pyximport.install()/g' "$PROJECT_ROOT/ai-pipeline/Kitsune-py/netStat.py" 2>/dev/null || true
+chmod -R 777 "$PROJECT_ROOT" 2>/dev/null || true
 
 echo "=================================================================="
 echo "[OK] Nodo '$NODE_HOSTNAME' listo con tcpdump, tshark y Kitsune-py preinstalados."
