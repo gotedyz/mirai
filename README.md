@@ -54,17 +54,17 @@ mirai/
 │   │   ├── 03_install_kali.sh                     # Instala Kali Linux 2026.2 QEMU
 │   │   └── install_all_images.sh                  # Instala todas las imágenes en un solo paso
 │   ├── victima-web/                               # 1. Nodo Victima-Web (172.16.0.100/24)
-│   │   ├── 01_fase_net_install.sh                 # [Con Net] DHCP + instala Nginx, curl, git
-│   │   └── 02_fase_aislada_ip.sh                  # [Aislado] Asigna IP 172.16.0.100/24 y verifica Nginx
+│   │   ├── 01_fase_net_install.sh                 # [Con Net] Hostname Victima-Web + DHCP + instala Nginx, curl, git
+│   │   └── 02_fase_aislada_ip.sh                  # [Aislado] Hostname Victima-Web + IP 172.16.0.100/24 + Nginx
 │   ├── iot-cam-1/                                 # 2. Nodo IoT-Cam-1 (192.168.10.10/24)
-│   │   ├── 01_fase_net_install.sh                 # [Con Net] DHCP + instala curl, nmap, hping3
-│   │   ├── 02_fase_aislada_ip.sh                  # [Aislado] IP 192.168.10.10/24 + GW 192.168.10.1 + Test NAT
+│   │   ├── 01_fase_net_install.sh                 # [Con Net] Hostname IoT-Cam-1 + DHCP + instala curl, nmap, hping3
+│   │   ├── 02_fase_aislada_ip.sh                  # [Aislado] Hostname IoT-Cam-1 + IP 192.168.10.10/24 + GW + Test NAT
 │   │   ├── 03_escenario1_benigno.sh               # [Tráfico] Escenario 1 (label=0): HTTP normal (~60s)
 │   │   ├── 04_escenario2_mirai_scan.sh            # [Ataque]  Escenario 2 (label=1): Escaneo Telnet 23/2323
 │   │   └── 05_escenario3_mirai_syn.sh             # [Ataque]  Escenario 3 (label=1): DDoS TCP SYN Flood (10s)
 │   └── soc-sniffer/                               # 3. Nodo SOC-Sniffer (eth0 Promiscuo sin IP)
-│       ├── 01_fase_net_install.sh                 # [Con Net] DHCP + instala tcpdump, tshark, Python + Kitsune-py
-│       ├── 02_fase_aislada_promisc.sh             # [Aislado] Limpia IP, desactiva IPv6 y activa PROMISC
+│       ├── 01_fase_net_install.sh                 # [Con Net] Hostname SOC-Sniffer + DHCP + tcpdump, tshark, Kitsune-py
+│       ├── 02_fase_aislada_promisc.sh             # [Aislado] Hostname SOC-Sniffer + Limpia IP + activa PROMISC
 │       └── 03_capturar_escenario.sh               # [Captura] Graba benign.pcap, mirai_scan.pcap o mirai_syn.pcap
 ├── configs/
 │   ├── router-hogar/                              # 4. Nodo Router-Hogar (MikroTik CHR 6.49.10)

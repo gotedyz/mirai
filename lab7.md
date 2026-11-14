@@ -163,22 +163,22 @@ write memory
 show monitor session 1
 ```
 
-#### Paso 5.3: Ejecutar los scripts de Red Aislada en cada nodo Linux
+#### Paso 5.3: Ejecutar los scripts de Red Aislada en cada nodo Linux (Hostname + IP)
 
-**En `Victima-Web` (`172.16.0.100/24`):**
+**En `Victima-Web` (Hostname `Victima-Web` | `172.16.0.100/24`):**
 ```bash
 cd /opt/mirai
 sudo bash scripts/victima-web/02_fase_aislada_ip.sh
 ```
 
-**En `IoT-Cam-1` (`192.168.10.10/24` | GW `192.168.10.1`):**
+**En `IoT-Cam-1` (Hostname `IoT-Cam-1` | `192.168.10.10/24` | GW `192.168.10.1`):**
 ```bash
 cd /opt/mirai
 sudo bash scripts/iot-cam-1/02_fase_aislada_ip.sh
 ```
-*(El script asigna la IP, configura la ruta por defecto y verifica automáticamente `curl -I http://172.16.0.100` a través del NAT de `Router-Hogar`).*
+*(El script configura el hostname `IoT-Cam-1`, asigna la IP, configura la ruta por defecto y verifica automáticamente `curl -I http://172.16.0.100` a través del NAT de `Router-Hogar`).*
 
-**En `SOC-Sniffer` (`eth0` en modo promiscuo sin IP):**
+**En `SOC-Sniffer` (Hostname `SOC-Sniffer` | `eth0` en modo promiscuo sin IP):**
 ```bash
 cd /opt/mirai
 sudo bash scripts/soc-sniffer/02_fase_aislada_promisc.sh
