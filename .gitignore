@@ -19,6 +19,17 @@ secrets/
 .ssh/
 
 # ==============================================================================
+# REPOSITORIO LOCAL DE VIDEOS: NO sincronizar la carpeta videos/ a GitHub
+# ==============================================================================
+videos/
+*.mp4
+*.mov
+*.mkv
+*.avi
+*.mp3
+*.wav
+
+# ==============================================================================
 # Ignorar capturas de tráfico pesadas, datasets temporales y entornos virtuales
 # ==============================================================================
 *.pcap
