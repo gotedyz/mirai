@@ -52,9 +52,9 @@ mirai/
 ├── scripts/
 │   ├── pnetlab-host/                              # 0. Servidor PNETLab (Consola root)
 │   │   ├── 01_install_mikrotik.sh                 # Instala MikroTik CHR 6.49.10
-│   │   ├── 02_install_viosl2.sh                   # Instala Cisco vIOS-L2 (ID 368) con ishare2
+│   │   ├── 02_install_viosl2.sh                   # Instala ishare2 (si falta) y descarga Cisco vIOS-L2 (ID 368)
 │   │   ├── 03_install_kali.sh                     # Instala Kali Linux 2026.2 QEMU
-│   │   └── install_all_images.sh                  # Instala todas las imágenes en un solo paso
+│   │   └── install_all_images.sh                  # Instala ishare2 + todas las imágenes en un solo paso
 │   ├── victima-web/                               # 1. Nodo Victima-Web (172.16.0.100/24)
 │   │   ├── 01_fase_net_install.sh                 # [Con Net] Hostname Victima-Web + DHCP + instala Nginx, curl, git
 │   │   └── 02_fase_aislada_ip.sh                  # [Aislado] Hostname Victima-Web + IP 172.16.0.100/24 + Nginx

@@ -62,7 +62,7 @@ Una vez importada la topología, conéctate por **SSH** a la consola `root` de l
 git clone https://github.com/gotedyz/mirai.git /opt/mirai
 cd /opt/mirai
 
-# Opción A: Instalar las 3 imágenes (MikroTik CHR, Cisco vIOS-L2 y Kali 2026.2) automáticamente:
+# Opción A: Instalar ishare2 (si no existe) y las 3 imágenes (MikroTik CHR, Cisco vIOS-L2 y Kali 2026.2) automáticamente:
 sudo bash scripts/pnetlab-host/install_all_images.sh
 
 # Opción B: O ejecutarlas de forma individual por separado:
