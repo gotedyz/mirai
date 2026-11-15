@@ -47,9 +47,16 @@ Construir en **PNETLab** una topología aislada que simule una red doméstica co
 
 ---
 
-### 3. Preparación de Imágenes en el Servidor PNETLab (Consola `root`)
+### 3. Inicio del Laboratorio: Importación de la Topología y Descarga de Imágenes en PNETLab
 
-Conéctate por SSH a la consola `root` de PNETLab, clona el repositorio y ejecuta los scripts de instalación de imágenes:
+#### Paso 3.1: Importar el archivo de topología en la interfaz web de PNETLab
+El repositorio incluye en la carpeta **`laboratorio/`** el paquete oficial con la topología lista para desarrollar:
+1. Descarga el archivo **[`laboratorio/Laboratorio07-mirai.zip`](laboratorio/Laboratorio07-mirai.zip)** desde este repositorio de GitHub.
+2. En el panel principal (interfaz web) de **PNETLab**, haz clic en el botón **Import** (Importar).
+3. Selecciona el archivo **`Laboratorio07-mirai.zip`** y haz clic en **Import** para cargar el escenario con todos los nodos y enlaces de la topología.
+
+#### Paso 3.2: Descargar e instalar las imágenes en la consola SSH de la MV PNETLab (`root`)
+Una vez importada la topología, conéctate por **SSH** a la consola `root` de la máquina virtual PNETLab, clona el repositorio y ejecuta los scripts de descarga de imágenes:
 
 ```bash
 git clone https://github.com/gotedyz/mirai.git /opt/mirai
@@ -63,7 +70,7 @@ sudo bash scripts/pnetlab-host/01_install_mikrotik.sh
 sudo bash scripts/pnetlab-host/02_install_viosl2.sh
 sudo bash scripts/pnetlab-host/03_install_kali.sh
 ```
-*(Al agregar los nodos Kali en la interfaz web de PNETLab, selecciónalos bajo la plantilla **Linux** con el nombre **`linux-kali-2026.2`**; credenciales predeterminadas: usuario `kali` / contraseña `kali` o `root`)*.
+*(Al abrir el laboratorio importado en la interfaz web de PNETLab, los nodos reconocerán automáticamente las imágenes instaladas **`mikrotik-6.49`**, **`viosl2`** y **`linux-kali-2026.2`**; credenciales de Kali: usuario `kali` / contraseña `kali` o `root`)*.
 
 ---
 

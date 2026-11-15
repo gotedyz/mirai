@@ -41,5 +41,7 @@ venv/
 .ipynb_checkpoints/
 Kitsune-py/
 *.zip
+!laboratorio/
+!laboratorio/*.zip
 *.7z
 *.qcow2

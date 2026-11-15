@@ -47,6 +47,8 @@ El flujo está diseñado bajo el principio **"Clonar en Fase `Net` $\rightarrow$
 mirai/
 ├── README.md                                      # Guía rápida de clonación y ejecución por nodo
 ├── lab7.md                                        # Guía de laboratorio completa paso a paso
+├── laboratorio/                                   # Topología oficial lista para importar en PNETLab
+│   └── Laboratorio07-mirai.zip                    # Archivo .zip de topología para importar en PNETLab Web
 ├── scripts/
 │   ├── pnetlab-host/                              # 0. Servidor PNETLab (Consola root)
 │   │   ├── 01_install_mikrotik.sh                 # Instala MikroTik CHR 6.49.10
@@ -83,9 +85,17 @@ mirai/
 
 ---
 
-## 🚀 Guía Rápida de Clonación y Ejecución por Dispositivo
+## 🚀 Guía Rápida de Inicio, Clonación y Ejecución por Dispositivo
 
-### 0. En el Servidor PNETLab (`root`) — Preparación de Imágenes
+### 0. Paso Inicial: Importar Topología e Instalar Imágenes en el Servidor PNETLab
+
+#### A) Paso 0.1 — Importar el archivo de topología en PNETLab Web
+1. Descarga el archivo [`laboratorio/Laboratorio07-mirai.zip`](laboratorio/Laboratorio07-mirai.zip) incluido en este repositorio.
+2. Ingresa a la interfaz web de tu máquina virtual **PNETLab** y haz clic en el icono **Import** (Importar laboratorio).
+3. Selecciona **`Laboratorio07-mirai.zip`**, súbelo y abre el laboratorio para visualizar la topología completa a desarrollar.
+
+#### B) Paso 0.2 — Descargar las imágenes desde la consola SSH de la MV PNETLab (`root`)
+Conéctate por SSH (`root`) a la máquina virtual de PNETLab, clona el repositorio y ejecuta el instalador de imágenes:
 ```bash
 git clone https://github.com/gotedyz/mirai.git /opt/mirai
 cd /opt/mirai
