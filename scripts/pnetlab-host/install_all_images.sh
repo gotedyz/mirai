@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # ==============================================================================
 # PROYECTO MIRAI - PNETLab Host (root)
-# Orquestador: Verifica/instala dependencias (unzip, 7z, ishare2) y descarga las imágenes
+# Orquestador: Verifica herramientas y valida cada imagen antes de descargarla
+# Si una imagen o su instalador comprimido ya fue descargado, NO lo vuelve a descargar
 # Uso: sudo bash scripts/pnetlab-host/install_all_images.sh
 # ==============================================================================
 set -euo pipefail
@@ -34,6 +35,7 @@ if ! command -v 7z >/dev/null 2>&1; then
         hash -r || true
     fi
 fi
+echo "[OK] Herramientas unzip y 7z listas."
 
 # 2. Asegurar ishare2 y todos sus módulos en /opt/ishare2/cli/lib/
 if ! command -v ishare2 >/dev/null 2>&1 || [ ! -f /opt/ishare2/cli/lib/logger.sh ]; then
@@ -50,6 +52,7 @@ else
     echo "[OK] ishare2 y sus módulos ya se encuentran instalados."
 fi
 
+# 3. Ejecutar cada instalador (cada script valida si la imagen o el archivo comprimido ya existe)
 bash "$SCRIPT_DIR/01_install_mikrotik.sh"
 bash "$SCRIPT_DIR/02_install_viosl2.sh"
 bash "$SCRIPT_DIR/03_install_kali.sh"
