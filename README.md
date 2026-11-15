@@ -56,8 +56,9 @@ mirai/
 │   │   ├── 00_prepare_pnetlab_host.sh             # [Base] Update APT + instala curl, git, unzip, 7z, ishare2, net-tools
 │   │   ├── 01_install_mikrotik.sh                 # Valida/instala MikroTik CHR 6.49.10
 │   │   ├── 02_install_viosl2.sh                   # Valida/instala Cisco vIOS-L2 (ID 368) con ishare2
-│   │   ├── 03_install_kali.sh                     # Valida/instala Kali Linux 2026.2 QEMU
-│   │   └── install_all_images.sh                  # Orquestador: prepara sistema + instala todas las imágenes
+│   │   ├── 03_install_kali.sh                     # Valida/instala Kali Linux 2026.2 QEMU (+ alias linux-kali-oficial)
+│   │   ├── 04_install_ubuntu_server.sh            # Valida/instala Linux Ubuntu Server 20.04 (linux-ubuntu-server-20.04)
+│   │   └── install_all_images.sh                  # Orquestador: prepara sistema + instala las 4 imágenes
 │   ├── victima-web/                               # 1. Nodo Victima-Web (172.16.0.100/24)
 │   │   ├── 01_fase_net_install.sh                 # [Con Net] Invoca 00_prepare_linux_vm.sh + instala y activa Nginx
 │   │   └── 02_fase_aislada_ip.sh                  # [Aislado] Hostname Victima-Web + IP 172.16.0.100/24 + Nginx

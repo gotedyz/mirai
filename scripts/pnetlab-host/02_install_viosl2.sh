@@ -8,7 +8,7 @@
 set -euo pipefail
 
 echo "=================================================================="
-echo "[2/3] Verificando imagen Switch Cisco vIOS-L2 (ID 368) en PNETLab..."
+echo "[2/4] Verificando imagen Switch Cisco vIOS-L2 (ID 368) en PNETLab..."
 echo "=================================================================="
 
 # 1. Validar si ya existe una imagen viosl2 instalada en PNETLab

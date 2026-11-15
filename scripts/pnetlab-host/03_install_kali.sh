@@ -1,26 +1,38 @@
 #!/usr/bin/env bash
 # ==============================================================================
 # PROYECTO MIRAI - PNETLab Host (root)
-# Script 03: Descargar y preparar Kali Linux oficial (linux-kali-2026.2)
+# Script 03: Descargar y preparar Kali Linux oficial (linux-kali-2026.2 y alias linux-kali-oficial)
 # Valida si virtioa.qcow2 o el archivo .7z ya existen para NO volver a descargar
 # Uso: sudo bash scripts/pnetlab-host/03_install_kali.sh
 # ==============================================================================
 set -euo pipefail
 
 echo "=================================================================="
-echo "[3/3] Verificando imagen Kali Linux (linux-kali-2026.2) en PNETLab..."
+echo "[3/4] Verificando imagen Kali Linux (linux-kali-2026.2) en PNETLab..."
 echo "=================================================================="
 
 TARGET_DIR="/opt/unetlab/addons/qemu/linux-kali-2026.2"
+ALIAS_DIR="/opt/unetlab/addons/qemu/linux-kali-oficial"
 ARCHIVE_NAME="kali-linux-2026.2-qemu-amd64.7z"
 ARCHIVE_URL="https://kali.download/base-images/kali-2026.2/$ARCHIVE_NAME"
 
 mkdir -p "$TARGET_DIR"
 cd "$TARGET_DIR"
 
+ensure_kali_alias() {
+    if [ -s "$TARGET_DIR/virtioa.qcow2" ]; then
+        mkdir -p "$ALIAS_DIR"
+        if [ ! -s "$ALIAS_DIR/virtioa.qcow2" ]; then
+            ln -f "$TARGET_DIR/virtioa.qcow2" "$ALIAS_DIR/virtioa.qcow2"
+        fi
+    fi
+}
+
 # 1. Validar si la imagen final virtioa.qcow2 ya está instalada y lista
 if [ -s "$TARGET_DIR/virtioa.qcow2" ]; then
-    echo "[OK] La imagen Kali Linux (virtioa.qcow2) ya está instalada en $TARGET_DIR."
+    ensure_kali_alias
+    /opt/unetlab/wrappers/unl_wrapper -a fixpermissions
+    echo "[OK] La imagen Kali Linux (virtioa.qcow2) ya está instalada en $TARGET_DIR (y alias linux-kali-oficial)."
     echo "     Omitiendo descarga y descompresión."
     exit 0
 fi
@@ -31,6 +43,7 @@ if [ -n "$EXISTING_QCOW2" ] && [ -s "$EXISTING_QCOW2" ]; then
     echo "[OK] Imagen descomprimida detectada ($EXISTING_QCOW2). Renombrando a virtioa.qcow2..."
     mv -f "$EXISTING_QCOW2" "$TARGET_DIR/virtioa.qcow2"
     rm -f "$TARGET_DIR/$ARCHIVE_NAME"
+    ensure_kali_alias
     /opt/unetlab/wrappers/unl_wrapper -a fixpermissions
     echo "[OK] Imagen linux-kali-2026.2 lista en: $TARGET_DIR"
     exit 0
@@ -107,8 +120,10 @@ for f in *.qcow2; do
 done
 rm -f "$ARCHIVE_NAME"
 
+ensure_kali_alias
+
 echo "[*] Reparando permisos de PNETLab..."
 /opt/unetlab/wrappers/unl_wrapper -a fixpermissions
 
-echo "[OK] Imagen linux-kali-2026.2 lista en: $TARGET_DIR"
+echo "[OK] Imagen linux-kali-2026.2 (y alias linux-kali-oficial) lista en: $TARGET_DIR"
 echo "     Credenciales por defecto: usuario 'kali' / password 'kali'"

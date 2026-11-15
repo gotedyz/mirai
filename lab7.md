@@ -66,7 +66,7 @@ sudo apt-get update -y && sudo apt-get install -y git curl wget unzip p7zip-full
 git clone https://github.com/gotedyz/mirai.git /opt/mirai
 cd /opt/mirai
 
-# Opción A (Recomendada): Preparar utilitarios del host + ishare2 + validar/descargar las 3 imágenes automáticamente:
+# Opción A (Recomendada): Preparar utilitarios del host + ishare2 + validar/descargar las 4 imágenes automáticamente:
 sudo bash scripts/pnetlab-host/install_all_images.sh
 
 # Opción B: O ejecutar cada etapa de forma individual por separado:
@@ -74,6 +74,7 @@ sudo bash scripts/pnetlab-host/00_prepare_pnetlab_host.sh
 sudo bash scripts/pnetlab-host/01_install_mikrotik.sh
 sudo bash scripts/pnetlab-host/02_install_viosl2.sh
 sudo bash scripts/pnetlab-host/03_install_kali.sh
+sudo bash scripts/pnetlab-host/04_install_ubuntu_server.sh
 ```
 
 ##### Matriz de paquetes y utilitarios instalados en TODAS las MVs Linux del laboratorio:

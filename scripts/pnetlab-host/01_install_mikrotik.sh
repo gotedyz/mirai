@@ -8,7 +8,7 @@
 set -euo pipefail
 
 echo "=================================================================="
-echo "[1/3] Verificando imagen MikroTik CHR 6.49.10 en PNETLab..."
+echo "[1/4] Verificando imagen MikroTik CHR 6.49.10 en PNETLab..."
 echo "=================================================================="
 
 TARGET_DIR="/opt/unetlab/addons/qemu/mikrotik-6.49"
