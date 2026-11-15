@@ -55,21 +55,35 @@ El repositorio incluye en la carpeta **`laboratorio/`** el paquete oficial con l
 2. En el panel principal (interfaz web) de **PNETLab**, haz clic en el botón **Import** (Importar).
 3. Selecciona el archivo **`Laboratorio07-mirai.zip`** y haz clic en **Import** para cargar el escenario con todos los nodos y enlaces de la topología.
 
-#### Paso 3.2: Descargar e instalar las imágenes en la consola SSH de la MV PNETLab (`root`)
-Una vez importada la topología, conéctate por **SSH** a la consola `root` de la máquina virtual PNETLab, clona el repositorio y ejecuta los scripts de descarga de imágenes:
+#### Paso 3.2: Actualizar la MV PNETLab limpia, instalar paquetes utilitarios y descargar imágenes en consola SSH (`root`)
+En una instalación limpia (OVA) de **PNETLab**, es necesario primero actualizar los índices de paquetes del sistema (`apt-get update`), instalar los utilitarios base de transferencia y descompresión (`git`, `curl`, `wget`, `unzip`, `p7zip-full`, `xz-utils`), clonar el repositorio y ejecutar el orquestador de imágenes (que valida primero si cada imagen ya fue descargada para no volver a bajarla):
 
 ```bash
+# 1. Actualizar el sistema base de PNETLab e instalar utilitarios iniciales
+sudo apt-get update -y && sudo apt-get install -y git curl wget unzip p7zip-full xz-utils ca-certificates
+
+# 2. Clonar el repositorio oficial del laboratorio
 git clone https://github.com/gotedyz/mirai.git /opt/mirai
 cd /opt/mirai
 
-# Opción A: Instalar ishare2 (si no existe) y las 3 imágenes (MikroTik CHR, Cisco vIOS-L2 y Kali 2026.2) automáticamente:
+# Opción A (Recomendada): Preparar utilitarios del host + ishare2 + validar/descargar las 3 imágenes automáticamente:
 sudo bash scripts/pnetlab-host/install_all_images.sh
 
-# Opción B: O ejecutarlas de forma individual por separado:
+# Opción B: O ejecutar cada etapa de forma individual por separado:
+sudo bash scripts/pnetlab-host/00_prepare_pnetlab_host.sh
 sudo bash scripts/pnetlab-host/01_install_mikrotik.sh
 sudo bash scripts/pnetlab-host/02_install_viosl2.sh
 sudo bash scripts/pnetlab-host/03_install_kali.sh
 ```
+
+##### Matriz de paquetes y utilitarios instalados en el laboratorio:
+| Dispositivo | Script que los instala | Paquetes, Descompresores y Utilitarios de Red |
+| :--- | :--- | :--- |
+| **`PNETLab Host` (Servidor)** | `00_prepare_pnetlab_host.sh` | `curl`, `wget`, `git`, `ca-certificates`, `jq`, `unzip`, `zip`, `p7zip-full` (`7z` / `7zz` estático), `xz-utils`, `tar`, `gzip`, `bzip2`, `qemu-utils` (`qemu-img`), `net-tools`, `iproute2`, `iputils-ping`, `dnsutils`, `tcpdump`, `bridge-utils`, `ishare2` |
+| **`Victima-Web`** | `scripts/victima-web/01_fase_net_install.sh` | `nginx`, `curl`, `wget`, `git`, `unzip`, `iproute2`, `net-tools`, `iputils-ping`, `dnsutils`, `nano` |
+| **`IoT-Cam-1`** | `scripts/iot-cam-1/01_fase_net_install.sh` | `curl`, `wget`, `git`, `nmap`, `hping3`, `unzip`, `iproute2`, `net-tools`, `iputils-ping`, `dnsutils`, `nano` |
+| **`SOC-Sniffer`** | `scripts/soc-sniffer/01_fase_net_install.sh` | `tcpdump`, `tshark`, `curl`, `wget`, `git`, `unzip`, `p7zip-full`, `iproute2`, `net-tools`, `iputils-ping`, `dnsutils`, `python3-scapy`, `python3-numpy`, `python3-pandas`, `python3-scipy`, `python3-sklearn`, `Kitsune-py` |
+
 *(Al abrir el laboratorio importado en la interfaz web de PNETLab, los nodos reconocerán automáticamente las imágenes instaladas **`mikrotik-6.49`**, **`viosl2`** y **`linux-kali-2026.2`**; credenciales de Kali: usuario `kali` / contraseña `kali` o `root`)*.
 
 ---

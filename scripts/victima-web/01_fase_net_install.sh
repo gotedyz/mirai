@@ -28,10 +28,10 @@ echo "[2/5] Solicitando IP por DHCP en la interfaz $IFACE..."
 dhclient "$IFACE" 2>/dev/null || true
 ip -4 addr show "$IFACE"
 
-echo "[3/5] Instalando nginx y curl (sin actualizar systemd/base innecesariamente)..."
+echo "[3/5] Actualizando listas APT e instalando nginx + utilitarios (curl, wget, git, net-tools, ping)..."
 export DEBIAN_FRONTEND=noninteractive
 apt-get update -y
-apt-get install -y --no-upgrade nginx curl git iproute2
+apt-get install -y --no-upgrade nginx curl wget git unzip iproute2 net-tools iputils-ping dnsutils nano
 
 echo "[4/5] Habilitando e iniciando el servicio Nginx..."
 systemctl daemon-reexec 2>/dev/null || true

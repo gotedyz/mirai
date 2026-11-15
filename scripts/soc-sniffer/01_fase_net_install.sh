@@ -28,11 +28,11 @@ echo "[2/4] Solicitando IP por DHCP en $IFACE..."
 dhclient "$IFACE" 2>/dev/null || true
 ip -4 addr show "$IFACE"
 
-echo "[3/4] Instalando tcpdump, tshark y librerías IA (sin actualizar systemd/python3 base)..."
+echo "[3/4] Actualizando listas APT e instalando tcpdump, tshark, librerías IA y utilitarios..."
 export DEBIAN_FRONTEND=noninteractive
 echo "wireshark-common wireshark-common/install-setuid boolean true" | debconf-set-selections || true
 apt-get update -y
-apt-get install -y --no-upgrade tcpdump tshark git python3-scapy python3-numpy python3-pandas python3-scipy python3-sklearn
+apt-get install -y --no-upgrade tcpdump tshark curl wget git unzip p7zip-full iproute2 net-tools iputils-ping dnsutils nano python3-scapy python3-numpy python3-pandas python3-scipy python3-sklearn
 
 echo "[4/4] Clonando repositorio oficial Kitsune-py (AfterImage) para uso offline..."
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

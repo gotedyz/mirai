@@ -28,10 +28,10 @@ echo "[2/4] Solicitando IP por DHCP en $IFACE..."
 dhclient "$IFACE" 2>/dev/null || true
 ip -4 addr show "$IFACE"
 
-echo "[3/4] Verificando/instalando curl, nmap y hping3 (sin actualizar base systemd)..."
+echo "[3/4] Actualizando listas APT e instalando curl, nmap, hping3 y utilitarios de red..."
 export DEBIAN_FRONTEND=noninteractive
 apt-get update -y
-apt-get install -y --no-upgrade curl nmap hping3 git iproute2
+apt-get install -y --no-upgrade curl wget git nmap hping3 unzip iproute2 net-tools iputils-ping dnsutils nano
 
 echo "[4/4] Verificando binarios instalados..."
 curl --version | head -n 1
