@@ -59,9 +59,12 @@ else
     echo "[!] Aviso: Aún no responde ping a 8.8.8.8. Verifica que el cable de $IFACE esté conectado a la nube 'Net'."
 fi
 
-echo "[5/5] Aplicando parche Kitsune-py (pyximport) y permisos de lectura/escritura a los .pcap..."
+echo "[5/5] Aplicando parches Kitsune-py (pyximport + NumPy 2.0 np.inf) y permisos a los .pcap..."
 if [ -f "$PROJECT_ROOT/ai-pipeline/Kitsune-py/netStat.py" ]; then
     sed -i 's/^import pyximport/#import pyximport/g; s/^pyximport\.install()/#pyximport.install()/g' "$PROJECT_ROOT/ai-pipeline/Kitsune-py/netStat.py" 2>/dev/null || true
+fi
+if [ -f "$PROJECT_ROOT/ai-pipeline/Kitsune-py/AfterImage.py" ]; then
+    sed -i 's/np\.Inf/np.inf/g; s/np\.NaN/np.nan/g' "$PROJECT_ROOT/ai-pipeline/Kitsune-py/AfterImage.py" 2>/dev/null || true
 fi
 chmod -R 777 "$PROJECT_ROOT" 2>/dev/null || true
 

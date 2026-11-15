@@ -44,6 +44,7 @@ if [ ! -d "$PROJECT_ROOT/ai-pipeline/Kitsune-py" ]; then
     git clone https://github.com/ymirsky/Kitsune-py.git "$PROJECT_ROOT/ai-pipeline/Kitsune-py"
 fi
 sed -i 's/^import pyximport/#import pyximport/g; s/^pyximport\.install()/#pyximport.install()/g' "$PROJECT_ROOT/ai-pipeline/Kitsune-py/netStat.py" 2>/dev/null || true
+sed -i 's/np\.Inf/np.inf/g; s/np\.NaN/np.nan/g' "$PROJECT_ROOT/ai-pipeline/Kitsune-py/AfterImage.py" 2>/dev/null || true
 chmod -R 777 "$PROJECT_ROOT" 2>/dev/null || true
 
 echo "=================================================================="

@@ -2,7 +2,7 @@
 """
 PROYECTO MIRAI - FASE 7 (Celda 1 / Script 01)
 Extracción de las 115 características estadísticas de N-BaIoT con AfterImage (Kitsune-py).
-Compatible con Google Colab y ejecución local en SOC-Sniffer (Python 3.10 - 3.14+).
+Compatible con Google Colab y ejecución local en SOC-Sniffer (Python 3.10 - 3.14+ y NumPy 1.x / 2.x+).
 
 Uso:
     python3 ai-pipeline/01_extract_nbaiot_115_features.py [--pcap-dir ./pcaps] [--out nbaiot_pnetlab.csv]
@@ -29,6 +29,43 @@ except ImportError:
 import numpy as np
 import pandas as pd
 
+# Shim de compatibilidad con NumPy 2.0+ (Kitsune-py/AfterImage.py utiliza alias antiguos como np.Inf y np.NaN)
+if not hasattr(np, "Inf"):
+    np.Inf = np.inf  # type: ignore[attr-defined]
+if not hasattr(np, "NaN"):
+    np.NaN = np.nan  # type: ignore[attr-defined]
+if not hasattr(np, "infty"):
+    np.infty = np.inf  # type: ignore[attr-defined]
+if not hasattr(np, "float_"):
+    np.float_ = np.float64  # type: ignore[attr-defined]
+if not hasattr(np, "int_"):
+    np.int_ = np.int64  # type: ignore[attr-defined]
+
+
+def patch_kitsune_files(kitsune_dir: Path) -> None:
+    """Parchea en disco netStat.py y AfterImage.py si hay permisos de escritura."""
+    netstat_py = kitsune_dir / "netStat.py"
+    if netstat_py.exists():
+        try:
+            txt = netstat_py.read_text(encoding="utf-8", errors="ignore")
+            new_txt = txt.replace("\nimport pyximport", "\n#import pyximport").replace(
+                "pyximport.install()", "#pyximport.install()"
+            )
+            if new_txt != txt:
+                netstat_py.write_text(new_txt, encoding="utf-8")
+        except OSError:
+            pass
+
+    afterimage_py = kitsune_dir / "AfterImage.py"
+    if afterimage_py.exists():
+        try:
+            txt = afterimage_py.read_text(encoding="utf-8", errors="ignore")
+            new_txt = txt.replace("np.Inf", "np.inf").replace("np.NaN", "np.nan")
+            if new_txt != txt:
+                afterimage_py.write_text(new_txt, encoding="utf-8")
+        except OSError:
+            pass
+
 
 def ensure_kitsune_repo(base_dir: Path) -> Path:
     """Busca o clona Kitsune-py para importar FeatureExtractor (AfterImage)."""
@@ -39,6 +76,7 @@ def ensure_kitsune_repo(base_dir: Path) -> Path:
     ]
     for candidate in candidates:
         if (candidate / "FeatureExtractor.py").exists():
+            patch_kitsune_files(candidate)
             sys.path.insert(0, str(candidate))
             return candidate
 
@@ -48,6 +86,7 @@ def ensure_kitsune_repo(base_dir: Path) -> Path:
         ["git", "clone", "-q", "https://github.com/ymirsky/Kitsune-py.git", str(target)],
         check=True,
     )
+    patch_kitsune_files(target)
     sys.path.insert(0, str(target))
     return target
 
