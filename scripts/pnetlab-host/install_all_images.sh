@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # ==============================================================================
 # PROYECTO MIRAI - PNETLab Host (root)
-# Orquestador: Verifica/instala ishare2 completo y descarga las imágenes del lab
+# Orquestador: Verifica/instala dependencias (unzip, 7z, ishare2) y descarga las imágenes
 # Uso: sudo bash scripts/pnetlab-host/install_all_images.sh
 # ==============================================================================
 set -euo pipefail
@@ -9,8 +9,33 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 echo "=================================================================="
-echo "[0/3] Verificando disponibilidad de ishare2 y sus módulos en PNETLab..."
+echo "[0/3] Verificando herramientas de descompresión (unzip, 7z) e ishare2..."
 echo "=================================================================="
+
+# 1. Asegurar unzip y 7z (vía apt o binario estático 7zz si los repos de PNETLab fallan)
+if ! command -v unzip >/dev/null 2>&1 || ! command -v 7z >/dev/null 2>&1; then
+    echo "[*] Instalando utilidades de descompresión (unzip / p7zip-full)..."
+    export DEBIAN_FRONTEND=noninteractive
+    apt-get update -y || true
+    apt-get install -y unzip p7zip-full p7zip xz-utils || true
+    hash -r || true
+fi
+
+if ! command -v 7z >/dev/null 2>&1; then
+    echo "[*] Instalando binario estático oficial 7-Zip (7zz Linux x64) en /usr/bin/7z..."
+    mkdir -p /tmp/7zip-static
+    if wget -q --show-progress -O /tmp/7zip-static/7z.tar.xz "https://github.com/ip7z/7zip/releases/download/24.09/7z2409-linux-x64.tar.xz" || \
+       wget -q --show-progress -O /tmp/7zip-static/7z.tar.xz "https://7-zip.org/a/7z2409-linux-x64.tar.xz"; then
+        tar -xf /tmp/7zip-static/7z.tar.xz -C /tmp/7zip-static
+        cp -f /tmp/7zip-static/7zz /usr/bin/7z
+        cp -f /tmp/7zip-static/7zz /usr/local/bin/7z
+        chmod +x /usr/bin/7z /usr/local/bin/7z
+        rm -rf /tmp/7zip-static
+        hash -r || true
+    fi
+fi
+
+# 2. Asegurar ishare2 y todos sus módulos en /opt/ishare2/cli/lib/
 if ! command -v ishare2 >/dev/null 2>&1 || [ ! -f /opt/ishare2/cli/lib/logger.sh ]; then
     echo "[*] Instalando/reparando ishare2 completo (binario + /opt/ishare2/cli/lib/)..."
     rm -rf /tmp/ishare2-cli
