@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # ==============================================================================
 # PROYECTO MIRAI - PNETLab Host (root)
-# Script 02: Instalar ishare2 (si no existe) y descargar Switch Cisco vIOS-L2 (ID 368)
+# Script 02: Instalar/reparar ishare2 completo y descargar Switch Cisco vIOS-L2 (ID 368)
 # Uso: sudo bash scripts/pnetlab-host/02_install_viosl2.sh
 # ==============================================================================
 set -euo pipefail
@@ -10,17 +10,16 @@ echo "=================================================================="
 echo "[+] Preparando descarga de Cisco vIOS-L2 (ID 368) mediante ishare2..."
 echo "=================================================================="
 
-if ! command -v ishare2 >/dev/null 2>&1; then
-    echo "[*] ishare2 no está instalado en este servidor PNETLab. Instalando..."
-    wget -q --show-progress -O /usr/sbin/ishare2 https://raw.githubusercontent.com/ishare2-org/ishare2-cli/main/ishare2
-    chmod +x /usr/sbin/ishare2
-    echo "[OK] ishare2 instalado correctamente en /usr/sbin/ishare2."
-fi
-
-# Si es la primera ejecución de ishare2 y solicita crear configuración por defecto, aceptar con Enter
-if [ ! -f /opt/ishare2/ishare2.conf ]; then
-    echo "[*] Inicializando configuración por defecto de ishare2..."
-    printf "\n\n\n\n\n" | ishare2 >/dev/null 2>&1 || true
+if ! command -v ishare2 >/dev/null 2>&1 || [ ! -f /opt/ishare2/cli/lib/logger.sh ]; then
+    echo "[*] Instalando/reparando ishare2 completo (binario + /opt/ishare2/cli/lib/)..."
+    rm -rf /tmp/ishare2-cli
+    git clone -q https://github.com/ishare2-org/ishare2-cli.git /tmp/ishare2-cli
+    mkdir -p /opt/ishare2/cli/lib
+    cp -rf /tmp/ishare2-cli/* /opt/ishare2/cli/
+    cp -f /tmp/ishare2-cli/ishare2 /usr/sbin/ishare2
+    chmod +x /usr/sbin/ishare2 /opt/ishare2/cli/ishare2 /opt/ishare2/cli/lib/*.sh
+    rm -rf /tmp/ishare2-cli
+    echo "[OK] ishare2 instalado correctamente con todos sus módulos."
 fi
 
 echo "[*] Ejecutando: ishare2 pull qemu 368..."
