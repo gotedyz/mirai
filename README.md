@@ -50,6 +50,8 @@ mirai/
 ├── laboratorio/                                   # Topología oficial lista para importar en PNETLab
 │   └── Laboratorio07-mirai.zip                    # Archivo .zip de topología para importar en PNETLab Web
 ├── scripts/
+│   ├── common/                                    # Base común para TODAS las MVs Linux del laboratorio
+│   │   └── 00_prepare_linux_vm.sh                 # [Base] Update APT + curl, wget, git, unzip, 7z/7zz, xz, net-tools, ping
 │   ├── pnetlab-host/                              # 0. Servidor PNETLab (Consola root)
 │   │   ├── 00_prepare_pnetlab_host.sh             # [Base] Update APT + instala curl, git, unzip, 7z, ishare2, net-tools
 │   │   ├── 01_install_mikrotik.sh                 # Valida/instala MikroTik CHR 6.49.10
@@ -57,16 +59,16 @@ mirai/
 │   │   ├── 03_install_kali.sh                     # Valida/instala Kali Linux 2026.2 QEMU
 │   │   └── install_all_images.sh                  # Orquestador: prepara sistema + instala todas las imágenes
 │   ├── victima-web/                               # 1. Nodo Victima-Web (172.16.0.100/24)
-│   │   ├── 01_fase_net_install.sh                 # [Con Net] Hostname Victima-Web + DHCP + instala Nginx, curl, git
+│   │   ├── 01_fase_net_install.sh                 # [Con Net] Invoca 00_prepare_linux_vm.sh + instala y activa Nginx
 │   │   └── 02_fase_aislada_ip.sh                  # [Aislado] Hostname Victima-Web + IP 172.16.0.100/24 + Nginx
 │   ├── iot-cam-1/                                 # 2. Nodo IoT-Cam-1 (192.168.10.10/24)
-│   │   ├── 01_fase_net_install.sh                 # [Con Net] Hostname IoT-Cam-1 + DHCP + instala curl, nmap, hping3
+│   │   ├── 01_fase_net_install.sh                 # [Con Net] Invoca 00_prepare_linux_vm.sh + instala nmap, hping3, nc, telnet
 │   │   ├── 02_fase_aislada_ip.sh                  # [Aislado] Hostname IoT-Cam-1 + IP 192.168.10.10/24 + GW + Test NAT
 │   │   ├── 03_escenario1_benigno.sh               # [Tráfico] Escenario 1 (label=0): HTTP normal (~60s)
 │   │   ├── 04_escenario2_mirai_scan.sh            # [Ataque]  Escenario 2 (label=1): Escaneo Telnet 23/2323
 │   │   └── 05_escenario3_mirai_syn.sh             # [Ataque]  Escenario 3 (label=1): DDoS TCP SYN Flood (10s)
 │   └── soc-sniffer/                               # 3. Nodo SOC-Sniffer (eth0 Promiscuo sin IP)
-│       ├── 01_fase_net_install.sh                 # [Con Net] Hostname SOC-Sniffer + DHCP + tcpdump, tshark, Kitsune-py
+│       ├── 01_fase_net_install.sh                 # [Con Net] Invoca 00_prepare_linux_vm.sh + tcpdump, tshark, IA y Kitsune-py
 │       ├── 02_fase_aislada_promisc.sh             # [Aislado] Hostname SOC-Sniffer + Limpia IP + activa PROMISC
 │       ├── 03_capturar_escenario.sh               # [Captura] Graba benign.pcap, mirai_scan.pcap o mirai_syn.pcap
 │       └── 04_regresar_modo_net.sh                # [Con Net] Quita PROMISC, pide DHCP a Net y sincroniza para usar Colab
@@ -104,21 +106,22 @@ cd /opt/mirai
 sudo bash scripts/pnetlab-host/install_all_images.sh
 ```
 
-##### Paquetes y utilitarios instalados automáticamente en el laboratorio:
-| Entorno / Nodo | Paquetes de Sistema, Descompresión, Red y Laboratorio |
-| :--- | :--- |
-| **`PNETLab Host` (`00_prepare_pnetlab_host.sh`)** | `curl`, `wget`, `git`, `ca-certificates`, `jq`, `unzip`, `zip`, `p7zip-full` (`7z` + binario estático `7zz`), `xz-utils`, `tar`, `gzip`, `bzip2`, `qemu-utils` (`qemu-img`), `net-tools`, `iproute2`, `iputils-ping`, `dnsutils`, `tcpdump`, `bridge-utils`, `ishare2` |
-| **`Victima-Web` (`01_fase_net_install.sh`)** | `nginx`, `curl`, `wget`, `git`, `unzip`, `iproute2`, `net-tools`, `iputils-ping`, `dnsutils`, `nano` |
-| **`IoT-Cam-1` (`01_fase_net_install.sh`)** | `curl`, `wget`, `git`, `nmap`, `hping3`, `unzip`, `iproute2`, `net-tools`, `iputils-ping`, `dnsutils`, `nano` |
-| **`SOC-Sniffer` (`01_fase_net_install.sh`)** | `tcpdump`, `tshark`, `curl`, `wget`, `git`, `unzip`, `p7zip-full`, `iproute2`, `net-tools`, `iputils-ping`, `dnsutils`, `python3-scapy`, `python3-numpy`, `python3-pandas`, `python3-scipy`, `python3-sklearn`, `Kitsune-py` |
+##### Paquetes y utilitarios instalados automáticamente en TODAS las MVs Linux del laboratorio:
+| Entorno / MV Linux | Script Base + Rol | Paquetes de Sistema, Descompresión, Red y Laboratorio |
+| :--- | :--- | :--- |
+| **`PNETLab Host` (Servidor)** | `00_prepare_pnetlab_host.sh` | `curl`, `wget`, `git`, `ca-certificates`, `jq`, `unzip`, `zip`, `p7zip-full` (`7z` + binario estático `7zz`), `xz-utils`, `tar`, `gzip`, `bzip2`, `qemu-utils` (`qemu-img`), `net-tools`, `iproute2`, `iputils-ping`, `dnsutils`, `tcpdump`, `bridge-utils`, `ishare2` |
+| **Base común (`Victima-Web`, `IoT-Cam-1`, `SOC-Sniffer`)** | `scripts/common/00_prepare_linux_vm.sh` | `curl`, `wget`, `git`, `ca-certificates`, `jq`, `nano`, `unzip`, `zip`, `p7zip-full` (`7z` + binario estático `7zz`), `xz-utils`, `tar`, `gzip`, `bzip2`, `iproute2`, `net-tools`, `iputils-ping`, `dnsutils`, `tcpdump`, `isc-dhcp-client`, `psmisc`, `procps` |
+| **`Victima-Web` (Rol específico)** | `scripts/victima-web/01_fase_net_install.sh` | Base común Linux + `nginx` (servidor HTTP) |
+| **`IoT-Cam-1` (Rol específico)** | `scripts/iot-cam-1/01_fase_net_install.sh` | Base común Linux + `nmap`, `hping3`, `netcat-traditional`, `telnet` |
+| **`SOC-Sniffer` (Rol específico)** | `scripts/soc-sniffer/01_fase_net_install.sh` | Base común Linux + `tcpdump`, `tshark`, `python3`, `python3-pip`, `python3-scapy`, `python3-numpy`, `python3-pandas`, `python3-scipy`, `python3-sklearn`, `Kitsune-py` |
 
 ---
 
 ### 1. En `Victima-Web` (`172.16.0.100/24`)
-**A) Conectado temporalmente a `Net` (Internet):**
+**A) Conectado temporalmente a `Net` (Internet — Actualización base + Utilitarios + Nginx):**
 ```bash
 sudo dhclient eth0
-sudo apt-get update && sudo apt-get install -y git
+sudo apt-get update -y && sudo apt-get install -y --no-upgrade git curl wget unzip p7zip-full xz-utils ca-certificates
 sudo git clone https://github.com/gotedyz/mirai.git /opt/mirai
 cd /opt/mirai
 sudo bash scripts/victima-web/01_fase_net_install.sh
@@ -133,10 +136,10 @@ sudo bash scripts/victima-web/02_fase_aislada_ip.sh
 ---
 
 ### 2. En `IoT-Cam-1` (`192.168.10.10/24`)
-**A) Conectado temporalmente a `Net` (Internet):**
+**A) Conectado temporalmente a `Net` (Internet — Actualización base + Utilitarios + Herramientas Mirai):**
 ```bash
 sudo dhclient eth0
-sudo apt-get update && sudo apt-get install -y git
+sudo apt-get update -y && sudo apt-get install -y --no-upgrade git curl wget unzip p7zip-full xz-utils ca-certificates
 sudo git clone https://github.com/gotedyz/mirai.git /opt/mirai
 cd /opt/mirai
 sudo bash scripts/iot-cam-1/01_fase_net_install.sh
@@ -156,10 +159,10 @@ sudo bash scripts/iot-cam-1/05_escenario3_mirai_syn.sh
 ---
 
 ### 3. En `SOC-Sniffer` (`eth0` Promiscuo)
-**A) Conectado temporalmente a `Net` (Internet):**
+**A) Conectado temporalmente a `Net` (Internet — Actualización base + Utilitarios + Sniffer/IA):**
 ```bash
 sudo dhclient eth0
-sudo apt-get update && sudo apt-get install -y git
+sudo apt-get update -y && sudo apt-get install -y --no-upgrade git curl wget unzip p7zip-full xz-utils ca-certificates
 sudo git clone https://github.com/gotedyz/mirai.git /opt/mirai
 cd /opt/mirai
 sudo bash scripts/soc-sniffer/01_fase_net_install.sh

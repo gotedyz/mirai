@@ -76,13 +76,14 @@ sudo bash scripts/pnetlab-host/02_install_viosl2.sh
 sudo bash scripts/pnetlab-host/03_install_kali.sh
 ```
 
-##### Matriz de paquetes y utilitarios instalados en el laboratorio:
-| Dispositivo | Script que los instala | Paquetes, Descompresores y Utilitarios de Red |
+##### Matriz de paquetes y utilitarios instalados en TODAS las MVs Linux del laboratorio:
+| Dispositivo / MV Linux | Script que los instala | Paquetes, Descompresores y Utilitarios de Red |
 | :--- | :--- | :--- |
-| **`PNETLab Host` (Servidor)** | `00_prepare_pnetlab_host.sh` | `curl`, `wget`, `git`, `ca-certificates`, `jq`, `unzip`, `zip`, `p7zip-full` (`7z` / `7zz` estático), `xz-utils`, `tar`, `gzip`, `bzip2`, `qemu-utils` (`qemu-img`), `net-tools`, `iproute2`, `iputils-ping`, `dnsutils`, `tcpdump`, `bridge-utils`, `ishare2` |
-| **`Victima-Web`** | `scripts/victima-web/01_fase_net_install.sh` | `nginx`, `curl`, `wget`, `git`, `unzip`, `iproute2`, `net-tools`, `iputils-ping`, `dnsutils`, `nano` |
-| **`IoT-Cam-1`** | `scripts/iot-cam-1/01_fase_net_install.sh` | `curl`, `wget`, `git`, `nmap`, `hping3`, `unzip`, `iproute2`, `net-tools`, `iputils-ping`, `dnsutils`, `nano` |
-| **`SOC-Sniffer`** | `scripts/soc-sniffer/01_fase_net_install.sh` | `tcpdump`, `tshark`, `curl`, `wget`, `git`, `unzip`, `p7zip-full`, `iproute2`, `net-tools`, `iputils-ping`, `dnsutils`, `python3-scapy`, `python3-numpy`, `python3-pandas`, `python3-scipy`, `python3-sklearn`, `Kitsune-py` |
+| **`PNETLab Host` (Servidor)** | `scripts/pnetlab-host/00_prepare_pnetlab_host.sh` | `curl`, `wget`, `git`, `ca-certificates`, `jq`, `unzip`, `zip`, `p7zip-full` (`7z` / `7zz` estático), `xz-utils`, `tar`, `gzip`, `bzip2`, `qemu-utils` (`qemu-img`), `net-tools`, `iproute2`, `iputils-ping`, `dnsutils`, `tcpdump`, `bridge-utils`, `ishare2` |
+| **Base común (`Victima-Web`, `IoT-Cam-1`, `SOC-Sniffer`)** | `scripts/common/00_prepare_linux_vm.sh` *(invocado automáticamente por cada nodo)* | `curl`, `wget`, `git`, `ca-certificates`, `jq`, `nano`, `unzip`, `zip`, `p7zip-full` (`7z` / `7zz` estático), `xz-utils`, `tar`, `gzip`, `bzip2`, `iproute2`, `net-tools`, `iputils-ping`, `dnsutils`, `tcpdump`, `isc-dhcp-client`, `psmisc`, `procps` |
+| **`Victima-Web`** | `scripts/victima-web/01_fase_net_install.sh` | Base común Linux + `nginx` (servidor web HTTP) |
+| **`IoT-Cam-1`** | `scripts/iot-cam-1/01_fase_net_install.sh` | Base común Linux + `nmap`, `hping3`, `netcat-traditional`, `telnet` |
+| **`SOC-Sniffer`** | `scripts/soc-sniffer/01_fase_net_install.sh` | Base común Linux + `tcpdump`, `tshark`, `python3`, `python3-pip`, `python3-scapy`, `python3-numpy`, `python3-pandas`, `python3-scipy`, `python3-sklearn`, `Kitsune-py` |
 
 *(Al abrir el laboratorio importado en la interfaz web de PNETLab, los nodos reconocerán automáticamente las imágenes instaladas **`mikrotik-6.49`**, **`viosl2`** y **`linux-kali-2026.2`**; credenciales de Kali: usuario `kali` / contraseña `kali` o `root`)*.
 
@@ -91,7 +92,7 @@ sudo bash scripts/pnetlab-host/03_install_kali.sh
 ### 4. FASE PREVIA OBLIGATORIA: Conexión temporal a `Net`, Clonación desde GitHub e Instalación
 
 > **¡IMPORTANTE!**  
-> Antes de interconectar los nodos entre sí y fijar IPs estáticas aisladas, **los 3 nodos Linux deben conectarse temporalmente a Internet mediante la nube `Net` (Cloud0 / NAT de PNETLab)** para clonar el repositorio desde GitHub (`/opt/mirai`) e instalar sus paquetes con su script `01_fase_net_install.sh`. Así, cuando pases a la **Red Aislada (sin Internet)**, cada dispositivo ya tendrá todos sus scripts descargados localmente.
+> Antes de interconectar los nodos entre sí y fijar IPs estáticas aisladas, **todas las MVs Linux del laboratorio (`Victima-Web`, `IoT-Cam-1` y `SOC-Sniffer`) deben conectarse temporalmente a Internet mediante la nube `Net` (Cloud0 / NAT de PNETLab)** para actualizar sus repositorios (`apt-get update`), instalar utilitarios base de descompresión y red (`00_prepare_linux_vm.sh`), clonar el repositorio desde GitHub (`/opt/mirai`) e instalar sus herramientas de rol con su script `01_fase_net_install.sh`. Así, cuando pases a la **Red Aislada (sin Internet)**, cada dispositivo ya tendrá todas sus herramientas y scripts listos localmente.
 
 ```text
     ┌──────────────┐     ┌──────────────┐     ┌──────────────┐
@@ -106,10 +107,10 @@ sudo bash scripts/pnetlab-host/03_install_kali.sh
 
 #### Paso 4.1: En `Victima-Web`
 1. Conectar `eth0` a la red **`Net`** y encender el nodo.
-2. Clonar el repositorio y ejecutar el script de aprovisionamiento (`01_fase_net_install.sh`):
+2. Actualizar índices del sistema, instalar utilitarios base, clonar el repositorio y ejecutar el script de aprovisionamiento (`01_fase_net_install.sh`, el cual invoca a `scripts/common/00_prepare_linux_vm.sh` + instala `nginx`):
    ```bash
    sudo dhclient eth0
-   sudo apt-get update && sudo apt-get install -y git
+   sudo apt-get update -y && sudo apt-get install -y --no-upgrade git curl wget unzip p7zip-full xz-utils ca-certificates
    sudo git clone https://github.com/gotedyz/mirai.git /opt/mirai
    cd /opt/mirai
    sudo bash scripts/victima-web/01_fase_net_install.sh
@@ -118,10 +119,10 @@ sudo bash scripts/pnetlab-host/03_install_kali.sh
 
 #### Paso 4.2: En `IoT-Cam-1` (`linux-kali-2026.2`)
 1. Conectar `eth0` a la red **`Net`** y encender el nodo.
-2. Clonar el repositorio y ejecutar el script de aprovisionamiento (`01_fase_net_install.sh`):
+2. Actualizar índices del sistema, instalar utilitarios base, clonar el repositorio y ejecutar el script de aprovisionamiento (`01_fase_net_install.sh`, el cual invoca a `scripts/common/00_prepare_linux_vm.sh` + instala `nmap`, `hping3`, `netcat`, `telnet`):
    ```bash
    sudo dhclient eth0
-   sudo apt-get update && sudo apt-get install -y git
+   sudo apt-get update -y && sudo apt-get install -y --no-upgrade git curl wget unzip p7zip-full xz-utils ca-certificates
    sudo git clone https://github.com/gotedyz/mirai.git /opt/mirai
    cd /opt/mirai
    sudo bash scripts/iot-cam-1/01_fase_net_install.sh
@@ -130,10 +131,10 @@ sudo bash scripts/pnetlab-host/03_install_kali.sh
 
 #### Paso 4.3: En `SOC-Sniffer` (`linux-kali-2026.2`)
 1. Conectar `eth0` a la red **`Net`** y encender el nodo.
-2. Clonar el repositorio y ejecutar el script de aprovisionamiento (`01_fase_net_install.sh` — instala `tcpdump`, `tshark`, librerías Python y pre-clona `Kitsune-py` para uso offline):
+2. Actualizar índices del sistema, instalar utilitarios base, clonar el repositorio y ejecutar el script de aprovisionamiento (`01_fase_net_install.sh`, el cual invoca a `scripts/common/00_prepare_linux_vm.sh` + instala `tcpdump`, `tshark`, librerías Python y pre-clona `Kitsune-py` para uso offline):
    ```bash
    sudo dhclient eth0
-   sudo apt-get update && sudo apt-get install -y git
+   sudo apt-get update -y && sudo apt-get install -y --no-upgrade git curl wget unzip p7zip-full xz-utils ca-certificates
    sudo git clone https://github.com/gotedyz/mirai.git /opt/mirai
    cd /opt/mirai
    sudo bash scripts/soc-sniffer/01_fase_net_install.sh
