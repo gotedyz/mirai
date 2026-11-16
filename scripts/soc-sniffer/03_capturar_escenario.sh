@@ -1,20 +1,30 @@
 #!/usr/bin/env bash
 # ==============================================================================
 # NODO: SOC-Sniffer (linux-kali-2026.2)
-# FASE 6: Captura de los 3 Escenarios de Tráfico (.pcap)
+# FASE 6: Captura Interactiva y Verbose EN CALIENTE de los 3 Escenarios (.pcap)
+# Propósito:
+#   - Captura el tráfico del puerto espejo (SPAN) guardándolo en el archivo .pcap
+#   - Muestra EN TIEMPO REAL (modo verbose en caliente) cada paquete capturado
+#     en pantalla mientras se escribe simultáneamente en disco
 # Uso:
-#   sudo bash scripts/soc-sniffer/03_capturar_escenario.sh benign [eth0]
-#   sudo bash scripts/soc-sniffer/03_capturar_escenario.sh mirai_scan [eth0]
-#   sudo bash scripts/soc-sniffer/03_capturar_escenario.sh mirai_syn [eth0]
+#   sudo bash scripts/soc-sniffer/03_capturar_escenario.sh [benign | mirai_scan | mirai_syn] [eth0]
+#   (Si no se indica el escenario por parámetro, muestra un menú interactivo)
 # ==============================================================================
 set -euo pipefail
 
 SCENARIO="${1:-}"
 IFACE="${2:-eth0}"
 
+# Menú interactivo si el usuario no pasa el escenario como argumento
 if [[ -z "$SCENARIO" ]]; then
-    echo "Uso: sudo bash $0 <benign | mirai_scan | mirai_syn> [interfaz=eth0]"
-    exit 1
+    echo "=================================================================="
+    echo "   [SOC-Sniffer] SELECCIÓN INTERACTIVA DE ESCENARIO A CAPTURAR"
+    echo "=================================================================="
+    echo "  1) benign      -> Escenario 1: Tráfico Normal / Benigno (label = 0)"
+    echo "  2) mirai_scan  -> Escenario 2: Propagación Mirai Telnet Scan (label = 1)"
+    echo "  3) mirai_syn   -> Escenario 3: Ataque DDoS Mirai TCP SYN Flood (label = 1)"
+    echo "------------------------------------------------------------------"
+    read -r -p "Selecciona el número o nombre del escenario [1/2/3]: " SCENARIO
 fi
 
 case "$SCENARIO" in
@@ -46,27 +56,38 @@ OUT_FILE="$PCAP_DIR/$PCAP_NAME"
 ip link set "$IFACE" up promisc on 2>/dev/null || true
 
 echo "=================================================================="
-echo "[SOC-Sniffer] INICIANDO CAPTURA: $DESC"
-echo "Interfaz : $IFACE (Modo Promiscuo)"
-echo "Archivo  : $OUT_FILE"
+echo "[SOC-Sniffer] CAPTURA EN CALIENTE (MODO VERBOSE EN TIEMPO REAL)"
+echo "Escenario : $DESC"
+echo "Interfaz  : $IFACE (Modo Promiscuo ACTIVO)"
+echo "Archivo   : $OUT_FILE"
 echo "=================================================================="
-echo "[!] Lanza ahora el tráfico desde IoT-Cam-1."
-echo "[!] Cuando termine, presiona [Ctrl + C] para cerrar y guardar el archivo."
+echo "[!] Lanza ahora el tráfico en la consola de IoT-Cam-1."
+echo "[!] Verás cada paquete en vivo aquí abajo conforme atraviese el SPAN."
+echo "[!] Cuando termine el escenario, presiona [Ctrl + C] para guardar."
 echo "------------------------------------------------------------------"
 
-tcpdump -i "$IFACE" -U -w "$OUT_FILE" || true
+trap 'echo ""; echo "[*] Deteniendo captura en vivo y cerrando archivo PCAP..."' INT
 
-# Crear enlace simbólico o copia en el directorio actual y dar permisos de escritura para tshark (.tsv)
+set +e
+# Captura binaria packet-buffered (-U) hacia archivo y simultáneamente decodifica en vivo (-v -n -l) en pantalla
+tcpdump -i "$IFACE" -U -w - 2>/dev/null | tee "$OUT_FILE" | tcpdump -r - -n -l -v
+set -e
+
+trap - INT
+
+# Crear copia en el directorio actual y dar permisos completos para tshark (.tsv)
 cp -f "$OUT_FILE" "./$PCAP_NAME" 2>/dev/null || true
 chmod -R 777 "$PCAP_DIR" "./$PCAP_NAME" 2>/dev/null || true
 
 echo ""
 echo "=================================================================="
-echo "[OK] Captura guardada en: $OUT_FILE (y ./$PCAP_NAME)"
-if command -v capinfos >/dev/null 2>&1; then
-    capinfos -c "$OUT_FILE" || true
-else
-    COUNT=$(tcpdump -r "$OUT_FILE" 2>/dev/null | wc -l || echo "0")
-    echo "[*] Total de paquetes capturados: $COUNT"
-fi
+echo "[OK] CAPTURA FINALIZADA Y GUARDADA: $OUT_FILE"
+echo "------------------------------------------------------------------"
+COUNT=$(tcpdump -r "$OUT_FILE" -n 2>/dev/null | wc -l || echo "0")
+FILE_SIZE=$(du -h "$OUT_FILE" 2>/dev/null | cut -f1 || echo "0K")
+echo "  -> Total de paquetes capturados : $COUNT paquetes"
+echo "  -> Tamaño del archivo .pcap     : $FILE_SIZE"
+echo "------------------------------------------------------------------"
+echo "  -> Muestra de los últimos 5 paquetes registrados en $PCAP_NAME:"
+tcpdump -r "$OUT_FILE" -n -c 5 2>/dev/null || true
 echo "=================================================================="

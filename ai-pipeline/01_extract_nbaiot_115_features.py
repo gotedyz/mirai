@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 PROYECTO MIRAI - FASE 7 (Celda 1 / Script 01)
-Extracción de las 115 características estadísticas de N-BaIoT con AfterImage (Kitsune-py).
+Extracción VERBOSE EN CALIENTE de las 115 características estadísticas de N-BaIoT con AfterImage (Kitsune-py).
 Compatible con Google Colab y ejecución local en SOC-Sniffer (Python 3.10 - 3.14+ y NumPy 1.x / 2.x+).
 
 Uso:
@@ -10,6 +10,7 @@ Uso:
 import argparse
 import subprocess
 import sys
+import time
 import types
 import warnings
 from pathlib import Path
@@ -112,26 +113,53 @@ def pcap_a_dataframe(ruta_pcap: Path, etiqueta: int, escenario: str) -> pd.DataF
         except PermissionError:
             pass
 
-    print(f"[+] Extrayendo 115 características N-BaIoT de: {ruta_pcap.name} (label={etiqueta}, {escenario})...")
+    print("------------------------------------------------------------------")
+    print(f"[+] EXTRAYENDO EN CALIENTE 115 FEATURES N-BaIoT: {ruta_pcap.name}")
+    print(f"    Escenario: {escenario} | Etiqueta: {etiqueta} ({'ATAQUE MIRAI' if etiqueta == 1 else 'TRÁFICO BENIGNO'})")
+    t0 = time.time()
     extractor = FE(str(ruta_pcap), limit=np.inf)
+
+    # Estimar total de paquetes desde el archivo .tsv recién generado por tshark
+    total_pkts = 0
+    if tsv_file.exists():
+        try:
+            with tsv_file.open("rb") as f:
+                total_pkts = max(0, sum(1 for _ in f) - 1)
+        except OSError:
+            total_pkts = 0
+
     columnas = extractor.nstat.getNetStatHeaders()
     filas = []
+    step_log = max(1, total_pkts // 10) if total_pkts > 20 else 25
 
     while True:
         vector = extractor.get_next_vector()
         if len(vector) == 0:
             break
         filas.append(vector)
+        n = len(filas)
+        if n == 1 or n % step_log == 0 or (total_pkts > 0 and n == total_pkts):
+            elapsed = max(0.001, time.time() - t0)
+            rate = n / elapsed
+            pct_str = f"{(n / total_pkts) * 100:5.1f}%" if total_pkts > 0 else "  en curso"
+            w_val = float(vector[0]) if len(vector) > 0 else 0.0
+            mean_val = float(vector[1]) if len(vector) > 1 else 0.0
+            print(
+                f"    [AfterImage EN VIVO] Paquete {n:6,d}/{total_pkts or '?'} ({pct_str}) "
+                f"| {rate:6.1f} pkt/s | MI_dir_L5_weight={w_val:.2f} | MI_dir_L5_mean={mean_val:.1f} B",
+                flush=True,
+            )
 
     df = pd.DataFrame(filas, columns=columnas)
     df["label"] = etiqueta
     df["scenario"] = escenario
-    print(f"    -> Paquetes procesados: {len(df):,} | Dimensiones: {df.shape}")
+    total_time = time.time() - t0
+    print(f"    [OK] {ruta_pcap.name} completado en {total_time:.2f}s -> {len(df):,} vectores x {df.shape[1]} columnas")
     return df
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Extractor de 115 features N-BaIoT (AfterImage)")
+    parser = argparse.ArgumentParser(description="Extractor Verbose de 115 features N-BaIoT (AfterImage)")
     parser.add_argument("--pcap-dir", type=str, default=".", help="Directorio donde están los .pcap")
     parser.add_argument("--out", type=str, default="nbaiot_pnetlab.csv", help="Ruta del CSV de salida")
     args = parser.parse_args()
