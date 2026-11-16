@@ -26,7 +26,8 @@ bash "$PROJECT_ROOT/scripts/common/00_prepare_linux_vm.sh" "$IFACE" "$NODE_HOSTN
 echo "[2/3] Instalando nmap, hping3, netcat y telnet..."
 export DEBIAN_FRONTEND=noninteractive
 apt-get install -y --no-upgrade nmap hping3 netcat-traditional telnet || \
-apt-get install -y --no-upgrade nmap hping3
+apt-get install -y nmap hping3 netcat-traditional telnet || \
+apt-get install -y nmap hping3
 
 # 3. Verificar binarios instalados
 echo "[3/3] Verificando binarios del nodo IoT-Cam-1..."

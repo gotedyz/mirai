@@ -76,7 +76,10 @@ apt-get install -y --no-upgrade \
     tcpdump \
     isc-dhcp-client \
     psmisc \
-    procps || true
+    procps || \
+apt-get install -y \
+    curl wget git ca-certificates jq nano unzip zip p7zip-full xz-utils tar gzip bzip2 \
+    iproute2 net-tools iputils-ping dnsutils tcpdump isc-dhcp-client psmisc procps || true
 hash -r || true
 
 # 5. Garantizar comando 7z (fallback a binario estático 7zz si p7zip-full falló)

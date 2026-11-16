@@ -25,7 +25,7 @@ bash "$PROJECT_ROOT/scripts/common/00_prepare_linux_vm.sh" "$IFACE" "$NODE_HOSTN
 # 2. Instalar servicio específico del nodo: Servidor Web Nginx
 echo "[2/4] Instalando servidor web Nginx..."
 export DEBIAN_FRONTEND=noninteractive
-apt-get install -y --no-upgrade nginx
+apt-get install -y --no-upgrade nginx || apt-get install -y nginx
 
 # 3. Habilitar e iniciar Nginx
 echo "[3/4] Habilitando e iniciando el servicio Nginx..."
